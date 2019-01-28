@@ -1,0 +1,33 @@
+version: "3.7"
+services:
+  nommer:
+    command: flask run --host=0.0.0.0
+    build:
+      context: .
+    volumes:
+      - ./:/app
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:s00persecret@db:5432/nommer
+      - NOMMER_URL=http://localhost:5000
+      - WAIT_HOSTS=db:5432
+  cli:
+    build:
+      context: ./cli
+    volumes:
+      - ./cli:/app
+    depends_on:
+      - nommer
+    environment:
+      - NOMMER_URL=http://nommer:5000
+  db:
+    image: postgres:11.1
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=s00persecret
+      - POSTGRES_DB=nommer
